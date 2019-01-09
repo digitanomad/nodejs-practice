@@ -1,0 +1,22 @@
+{
+  "name": "nodejs-practice",
+  "version": "1.0.0",
+  "description": "server side javascript tutorial",
+  "main": "hello.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/digitanomad/nodejs-practice.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/digitanomad/nodejs-practice/issues"
+  },
+  "homepage": "https://github.com/digitanomad/nodejs-practice#readme",
+  "dependencies": {
+    "underscore": "^1.9.1"
+  }
+}
