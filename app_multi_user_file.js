@@ -2,7 +2,8 @@ var express = require('express');
 var session = require('express-session');
 var FileStore = require('session-file-store')(session);
 var bodyParser = require('body-parser');
-var sha256 = require('sha256');
+var bkfd2Password = require("pbkdf2-password");
+var hasher = bkfd2Password();
 var app = express();
 app.use(session({
     secret: 'ekenirqkqwlek2sd',
@@ -14,15 +15,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 var users = [
     {
         username: 'egoing',
-        password: 'd0c0e8247e29f545c60d98f6c2adbac7af37f42b5156bb9d161db09220e5b410',
-        salt: '!dsfsdr213',
+        password: '8N4HTK31JkplqNoDB3Llc5DY6C7tlSqGb9AU3U4xFaEm+kXBuzirtlI8z362ri1LnuiV1IXAxhrSfHOiIATiYMpiar5vBGQBZILPdDUFRzGqM2FGF6umHnagRU79krP7iyJrC+ToQaDC/KAl9AC1tGhBDMZ6HXdncB14tLQ11GM=',
+        salt: 'Aba1Fq/rgWm68KI3DN4lXi2MTTNYZJj28oG1jkrVZ367lM2Dw+Kdc0S2UyGxrsXnwS12iEq9WLr5tJ4fgA+ncQ==',
         displayName: 'Egoing'
-    },
-    {
-        username: 'KBB85',
-        password: '832094071f95cfaeb543ed8291b427c302f4ad939d93a527081047165cfe092d',
-        salt: '21ijodfi1mk',
-        displayName: 'K5'
     }
 ];
 
@@ -40,10 +35,16 @@ app.post('/auth/login', function(req, res) {
 
     for (var i = 0; i < users.length; i++) {
         var user = users[i];
-        if (uname === user.username && sha256(pwd + user.salt) === user.password) {
-            req.session.displayName = user.displayName;
-            return req.session.save(function() {
-                res.redirect('/welcome');
+        if (uname == user.username) {
+            return hasher({ password: pwd, salt: user.salt }, function(err, pass, salt, hash) {
+                if (hash === user.password) {
+                    req.session.displayName = user.displayName;
+                    req.session.save(function() {
+                        res.redirect('/welcome');
+                    });
+                } else {
+                    res.send('Who are you?  <a href="/auth/login">login</a>');
+                }
             });
         }
     }
@@ -71,17 +72,19 @@ app.get('/welcome', function(req, res) {
     }
 });
 app.post('/auth/register', function(req, res) {
-    var user = {
-        username: req.body.username,
-        password: req.body.password,
-        displayName: req.body.displayName
-    };
-
-    users.push(user);
-
-    req.session.displayName = req.body.displayName;
-    req.session.save(function() {
-        res.redirect('/welcome');
+    hasher({ password: req.body.password}, function(err, pass, salt, hash) {
+        var user = {
+            username: req.body.username,
+            password: hash,
+            displayName: req.body.displayName,
+            salt: salt
+        };
+        users.push(user);
+    
+        req.session.displayName = req.body.displayName;
+        req.session.save(function() {
+            res.redirect('/welcome');
+        });
     });
 });
 app.get('/auth/register', function(req, res) {
