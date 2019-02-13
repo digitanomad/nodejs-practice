@@ -25,15 +25,6 @@ var users = [
     }
 ];
 
-app.get('/count', function(req, res) {
-    if (req.session.count) {
-        req.session.count++;
-    } else {
-        req.session.count = 1;
-    }
-    res.send('count : ' + req.session.count);
-});
-
 passport.use(new LocalStrategy(
     function(username, password, done) {
         var uname = username;
