@@ -5,14 +5,14 @@ module.exports = function(passport) {
     var conn = require('../../config/mysql/db')();
 
     route.post('/login',
-        passport.authenticate('local', { successRedirect: '/welcome',
+        passport.authenticate('local', { successRedirect: '/topic',
                                         failureRedirect: '/auth/login',
                                         failureFlash: false })
     );
     route.get('/logout', function(req, res) {
         req.logout();
         req.session.save(function() {
-            res.redirect('/welcome');
+            res.redirect('/topic');
         });
     });
     route.post('/register', function(req, res) {
@@ -35,17 +35,23 @@ module.exports = function(passport) {
 
                 req.login(user, function(err) {
                     req.session.save(function() {
-                        res.redirect('/welcome');
+                        res.redirect('/topic');
                     });
                 });
             });
         });
     });
     route.get('/register', function(req, res) {
-        res.render('auth/register');
+        var sql = 'SELECT id, title FROM topic';
+        conn.query(sql, function(err, topics, fields) {
+            res.render('auth/register', { topics: topics });
+        });
     });
     route.get('/login', function(req, res) {
-        res.render('auth/login');
+        var sql = 'SELECT id, title FROM topic';
+        conn.query(sql, function(err, topics, fields) {
+            res.render('auth/login', { topics: topics });
+        });
     });
 
     return route;
